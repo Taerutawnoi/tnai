@@ -1,0 +1,53 @@
+name: thai-newsletter-ai
+services:
+  apache:
+      build: ./apache
+      container_name: tnai_apache
+      networks:
+        - tnai_network
+      ports:
+          - "85:80"
+      command: []
+      volumes: 
+          - ./web:/var/www/html
+      restart: unless-stopped
+  mariadb:
+      image: mariadb:latest
+      container_name: tnai_mariadb
+      networks:
+        - tnai_network
+      command: []
+      volumes: 
+            - ./mariadb/config:/config
+            - ./mariadb/mysql:/var/lib/mysql
+      environment: 
+        MARIADB_ROOT_PASSWORD: dbroot
+        MARIADB_USER: tnai_user
+        MARIADB_PASSWORD: tnaidatabase
+        MARIADB_DATABASE: thai_newsletter_ai
+      restart: unless-stopped
+  phpmyadmin: 
+      image: phpmyadmin:latest
+      container_name: tnai_phpmyadmin
+      networks:
+        - tnai_network
+      ports:
+          - "86:80"
+      command: []
+      restart: unless-stopped
+      environment: 
+        PMA_HOST: mariadb
+        PMA_PORT: 3306
+        PMA_USER: root
+        PMA_PASSWORD: dbroot
+  ollama:
+      image: ollama/ollama:0.24.0
+      container_name: tnai_ollama
+      networks:
+        - tnai_network
+      command: []
+      volumes:
+            - ./ollama:/root/.ollama
+networks:
+  tnai_network:
+    driver: bridge
